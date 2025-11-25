@@ -39,7 +39,6 @@ sudo apt install -y postgresql
 
 **Note:** If you want to install and use the PostgreSQL Apt Repository rather than the Ubuntu distribution repository see:  https://www.postgresql.org/download/linux/ubuntu/
 
-### Configuration
 I chose to keep the entirety of the database in the `fireflyiii` directory, however, I am going to makes sure the data is not posted publicly with `gitignore`.
 ```shell
 initdb -D ~/fireflyiii/pgsql/data
@@ -59,6 +58,21 @@ export PATH=$PATH:/usr/lib/postgresql/postgresql_version/bin
 or more permanently by adding the above line to `.bashrc`, `.zshrc`, etc.
 
 I leave it up to the user to decide if they want their PostgreSQL databases for financial information on a separate PostgreSQL cluster.
+
+### Configuration
+#### Locale
+1. Using a text editor open the PostgreSQL data dircetory created above.
+1. I prefer using UTC for timezones, search for `timezone` and `log_timezone` and set it to `'UTC'`.
+1. For some reason PostgreSQL created my database cluster with a mish-mash of localization settings from the United States and Great Britain.  
+`lc_monetary = 'en_US.UTF-8'`  
+was the only setting I chose to change outright.
+
+#### Logging
+Just in case I want to make sure the logs are also configured to output to the `fireflyiii/pgsql` directory to ensure log information is not pushed to github.
+- `log_destination = 'jsonlog'`
+- `logging_collector = on`
+- `log_directory` = `log`
+- Uncomment `log_filename`
 
 ## PHP
 ### Installation
