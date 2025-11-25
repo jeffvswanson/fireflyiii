@@ -72,7 +72,26 @@ Just in case I want to make sure the logs are also configured to output to the `
 - `log_destination = 'jsonlog'`
 - `logging_collector = on`
 - `log_directory` = `log`
-- Uncomment `log_filename`
+- Uncomment `log_filename`  
+- Ensure the PostgreSQL generic logfile does not get committed to version control.
+```shell
+sed -i '$a \logfile' .gitignore
+```
+
+#### Permissions
+```shell
+sudo chown -R $USER:sudo /var/run/postgresql
+```
+
+### Start the Server
+```shell
+pg_ctl -D ~/fireflyiii/pgsql/data -l logfile start
+```
+
+### Create the Database
+```shell
+psql firefly-iii
+```
 
 ## PHP
 ### Installation
