@@ -31,6 +31,9 @@ ps -ax | grep nginx
 Another way is to navigate to http://localhost.  
 The result should be a page with, "**Welcome to nginx!**"
 
+### Configuration
+
+
 ## PostgreSQL
 ### Installation
 ```shell
@@ -90,7 +93,8 @@ pg_ctl -D ~/fireflyiii/pgsql/data -l logfile start
 
 ### Create the Database
 ```shell
-psql firefly-iii
+createdb firefly
+psql firefly
 ```
 
 ## PHP
@@ -110,3 +114,39 @@ php -v
 1. In your text editor of choice open `etc/php/8.4/fpm/php.ini` with permissions to write to the file.
 1. Search for `memory_limit` and set it to `512M`.
 1. I prefer using UTC for timezones, search for `date` and set it to `UTC` or your timezone of choice.
+
+## Firefly
+- Make the directory for the firefly application which nginx will serve.
+```shell
+mkdir ~/fireflyiii/www && cd $_
+```
+- Add the firefly app code to `.gitignore`
+```shell
+sed -i '$a \/www/**' ../.gitignore
+```
+
+- Download Firefly-iii version 6.4.8 and its checksum file.
+```shell
+curl -sLO https://github.com/firefly-iii/firefly-iii/releases/download/v6.4.8/FireflyIII-v6.4.8.tar.gz
+```
+```shell
+curl -sLO https://github.com/firefly-iii/firefly-iii/releases/download/v6.4.8/FireflyIII-v6.4.8.tar.gz.sha256
+```
+- Verify the tarball's integrity
+```shell
+sha256sum -c FireflyIII-v6.4.8.tar.gz.sha256
+> FireflyIII-v6.4.8.tar.gz: OK
+```
+- Extract the tarball
+```shell
+mkdir ./firefly-iii && tar -xvf FireflyIII-v6.4.8.tar.gz -C ./firefly-iii
+```
+- Follow the directions in  
+https://docs.firefly-iii.org/how-to/firefly-iii/installation/self-managed/#firefly-iii-configuration  
+and also update these values with information from  
+https://docs.firefly-iii.org/references/faq/install/#i-want-to-use-postgresql
+  - `SITE_OWNER`
+  - `APP_KEY`, I let a password manager generate the key and stored it as well.
+  - `DB_CONNECTION=pgsql`
+  - `DB_HOST`, Should be the user profile which created the database.
+  - 
