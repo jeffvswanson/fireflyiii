@@ -86,7 +86,7 @@ sed -i '$a \logfile' .gitignore
 sudo chown -R $USER:sudo /var/run/postgresql
 ```
 
-### Start the Server
+### Start the Server Cluster
 ```shell
 pg_ctl -D ~/fireflyiii/pgsql/data -l logfile start
 ```
@@ -108,6 +108,26 @@ sudo apt install -y php8.4 php8.4-{bcmath,cli,common,curl,fpm,imap,intl,gd,ldap,
 Check the install with:
 ```shell
 php -v
+```
+
+Add PHP Composer to manage PHP dependencies.
+```shell
+cd ~
+curl -sS https://getcomposer.org/installer -o composer-setup.php
+sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+```
+
+Verify composer is installed correctly with:
+```shell
+php /usr/local/bin/composer -V
+> Composer version 2.9.2 2025-11-19 21:57:25
+> PHP version 8.4.15 (/usr/bin/php8.4)
+> Run the "diagnose" command to get more detailed diagnostics output.
+```
+
+If all looks in order
+```shell
+rm composer-setup.php
 ```
 
 ### Configuration
@@ -148,5 +168,6 @@ https://docs.firefly-iii.org/references/faq/install/#i-want-to-use-postgresql
   - `SITE_OWNER`
   - `APP_KEY`, I let a password manager generate the key and stored it as well.
   - `DB_CONNECTION=pgsql`
-  - `DB_HOST`, Should be the user profile which created the database.
-  - 
+  - `DB_HOST=db`
+  - `DB_USERNAME`, Should be the user unless changed after the `createdb` command.
+  - `DB_PASSWORD`, 
