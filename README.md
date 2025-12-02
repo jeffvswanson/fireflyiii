@@ -42,13 +42,24 @@ sudo apt install -y postgresql
 
 **Note:** If you want to install and use the PostgreSQL Apt Repository rather than the Ubuntu distribution repository see:  https://www.postgresql.org/download/linux/ubuntu/
 
+#### Set up PostgreSQL Cluster's Ephemeral Directory
 ```shell
 mkdir -p ~/fireflyiii/pgsql/tmp
 ```
 ```shell
 mktemp -p ~/fireflyiii/pgsql/tmp -t $(date +%Y%m%d-%H%M%S)-XXX
 ```
-This file isn't necessary and can be removed since the only purpose is to hold the postgresql socket files while the database server is running.
+This file isn't necessary and can be removed since the only purpose is to hold the postgresql socket files while the database server is running.  
+Make sure the server's `tmp` folder gets cleared to prevent it from filling up.
+```
+crontab -e
+```
+and add the line:  
+`@reboot rm -rf /home/$USER/fireflyiii/pgsql/tmp/*`  
+and replace `$USER` with the concrete value.
+
+#### Set up PostgreSQL Cluster's Logging Directory
+In the `/fireflyiii/pgsql` directory
 ```shell
 mkdir log
 ```
@@ -56,11 +67,8 @@ I chose to keep the entirety of the database in the `fireflyiii` directory, howe
 ```shell
 echo '/pgsql/data/**' >> .gitignore
 sed -i '$a /pgsql/tmp/**' .gitignore
+sed -i '$a *.log' .gitignore
 ```
-```shell
-sudo pg_createcluster -u $USER -d ~/fireflyiii/pgsql/data -l ~/fireflyiii/pgsql/postgresql-18-firefly.log -s ~/fireflyiii/pgsql/tmp --lc-monetary en_US.UTF-8  18 firefly
-```
-
 ```shell
 pg_ctl init -D /home/$USER/fireflyiii/pgsql/data -l /home/$USER/fireflyiii/pgsql/postgresql-18-firefly.log
 ```

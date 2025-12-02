@@ -2,3 +2,6 @@
 /pgsql/tmp/**
 /pgsql/logfile
 /www/**
+*.log
+*.tar.gz
+*.tar.gz.sha256
