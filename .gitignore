@@ -1,1 +1,4 @@
+/pgsql/data/**
+/pgsql/tmp/**
+/pgsql/logfile
 /www/**

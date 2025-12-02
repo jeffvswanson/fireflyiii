@@ -42,16 +42,40 @@ sudo apt install -y postgresql
 
 **Note:** If you want to install and use the PostgreSQL Apt Repository rather than the Ubuntu distribution repository see:  https://www.postgresql.org/download/linux/ubuntu/
 
+```shell
+mkdir -p ~/fireflyiii/pgsql/tmp
+```
+```shell
+mktemp -p ~/fireflyiii/pgsql/tmp -t $(date +%Y%m%d-%H%M%S)-XXX
+```
+This file isn't necessary and can be removed since the only purpose is to hold the postgresql socket files while the database server is running.
+```shell
+mkdir log
+```
 I chose to keep the entirety of the database in the `fireflyiii` directory, however, I am going to makes sure the data is not posted publicly with `gitignore`.
 ```shell
-initdb -D ~/fireflyiii/pgsql/data
-echo '/pgsql/**' >> .gitignore
+echo '/pgsql/data/**' >> .gitignore
+sed -i '$a /pgsql/tmp/**' .gitignore
+```
+```shell
+sudo pg_createcluster -u $USER -d ~/fireflyiii/pgsql/data -l ~/fireflyiii/pgsql/postgresql-18-firefly.log -s ~/fireflyiii/pgsql/tmp --lc-monetary en_US.UTF-8  18 firefly
+```
+
+```shell
+pg_ctl init -D /home/$USER/fireflyiii/pgsql/data -l /home/$USER/fireflyiii/pgsql/postgresql-18-firefly.log
+```
+
+should yield:
+```shell
+> ... elided for clarity
+> Success. You can now start the database server using:
+
+    /usr/lib/postgresql/18/bin/pg_ctl -D /home/$USER/fireflyiii/pgsql/data -l logfile start
 ```
 
 If you get an error similar to this:
 ```shell
-initdb -D ~/fireflyiii/pgsql/data
-> initdb: command not found
+> pg_ctl: command not found
 ```
 It means postgresql and its client commands are not in the list of directories the operating system will search for executable files.  
 This can be remedied by adding postgresql to the `PATH` variable.
@@ -63,32 +87,41 @@ or more permanently by adding the above line to `.bashrc`, `.zshrc`, etc.
 I leave it up to the user to decide if they want their PostgreSQL databases for financial information on a separate PostgreSQL cluster.
 
 ### Configuration
+Many of these settings can be added to the `pg_ctl init` command above, but I find this to become unwieldy and prone to mistakes.
+At the bottom of the `pgsql/data/postgresql.conf` file or somewhere therewithin under the header `CONFIG FILE INCLUDES` change the value  
+
+`include_if_exists = '../postgresql.conf`  
+
+Which allows a configuration file to be kept in version control and separate from the auto-generated known good state configuration file in the data directory.
+
 #### Locale
-1. Using a text editor open the PostgreSQL data dircetory created above.
+1. Using a text editor open the PostgreSQL data directory created above and edit `fireflyiii/pgsql/postgresql.conf`.
 1. I prefer using UTC for timezones, search for `timezone` and `log_timezone` and set it to `'UTC'`.
-1. For some reason PostgreSQL created my database cluster with a mish-mash of localization settings from the United States and Great Britain.  
+1. PostgreSQL created my database cluster with a mish-mash of localization settings from the United States and Great Britain because of the Pop!-OS Region & Language configuration settings I chose.  
 `lc_monetary = 'en_US.UTF-8'`  
 was the only setting I chose to change outright.
 
 #### Logging
 Just in case I want to make sure the logs are also configured to output to the `fireflyiii/pgsql` directory to ensure log information is not pushed to github.
+- `unix_socket_directories = '/home/$USER/fireflyiii/pgsql/tmp'` where `$USER` gets replaced with the concrete value of $USER.
 - `log_destination = 'jsonlog'`
 - `logging_collector = on`
-- `log_directory` = `log`
-- Uncomment `log_filename`  
+- `log_directory` = `../log` I want the logs under the `pgsql` directory, but not mixed with the postgres data.
+- `log_filename = 'postgresql-%Y%m%d%-H%M%S.log'`  
 - Ensure the PostgreSQL generic logfile does not get committed to version control.
 ```shell
 sed -i '$a \logfile' .gitignore
 ```
 
-#### Permissions
-```shell
-sudo chown -R $USER:sudo /var/run/postgresql
-```
-
 ### Start the Server Cluster
 ```shell
-pg_ctl -D ~/fireflyiii/pgsql/data -l logfile start
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+```
+```shell
+pg_ctl start -D ~/fireflyiii/pgsql/data
+> ...elided for clarity
+server started
 ```
 
 ### Create the Database
