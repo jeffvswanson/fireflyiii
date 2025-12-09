@@ -80,7 +80,7 @@ should yield:
 
     /usr/lib/postgresql/18/bin/pg_ctl -D /home/$USER/fireflyiii/pgsql/data -l logfile start
 ```
-
+git 
 If you get an error similar to this:
 ```shell
 > pg_ctl: command not found
@@ -134,8 +134,17 @@ server started
 
 ### Create the Database
 ```shell
-createdb firefly
-psql firefly
+createdb --host=/home/$USER/fireflyiii/pgsql/tmp firefly
+psql --host=/home/$USER/fireflyiii/pgsql/tmp --dbname=firefly
+```
+In the `firefly` database cluster:
+```shell
+firefly=# CREATE SCHEMA IF NOT EXISTS budget AUTHORIZATION pg_database_owner;
+CREATE SCHEMA
+firefly=# CREATE TABLE budget.test (item int, description text);
+CREATE TABLE
+firefly=# DROP TABLE budget.test;
+DROP TABLE
 ```
 
 ## PHP
@@ -202,6 +211,10 @@ sha256sum -c FireflyIII-v6.4.8.tar.gz.sha256
 ```shell
 mkdir ./firefly-iii && tar -xvf FireflyIII-v6.4.8.tar.gz -C ./firefly-iii
 ```
+
+### Configuration
+In the firefly-iii `.env` where the above tarball was extracted:
+
 - Follow the directions in  
 https://docs.firefly-iii.org/how-to/firefly-iii/installation/self-managed/#firefly-iii-configuration  
 and also update these values with information from  
@@ -209,6 +222,38 @@ https://docs.firefly-iii.org/references/faq/install/#i-want-to-use-postgresql
   - `SITE_OWNER`
   - `APP_KEY`, I let a password manager generate the key and stored it as well.
   - `DB_CONNECTION=pgsql`
-  - `DB_HOST=db`
+  - `DB_HOST=/home/$USER/fireflyiii/pgsql/tmp`, with $USER having to be the concrete value.
   - `DB_USERNAME`, Should be the user unless changed after the `createdb` command.
-  - `DB_PASSWORD`, 
+  - `DB_PASSWORD`
+  - `PGSQL_SCHEMA`=budget
+
+#### Initialize the Database
+Similar to the commands in  
+https://docs.firefly-iii.org/how-to/firefly-iii/installation/self-managed/#initialize-the-database,  
+but with some modifications due to using Postgresql.
+
+Within the firefly-iii application directory:
+```shell
+php artisan migrate:refresh --force --seed
+```
+
+This creates all the necessary tables and sequence object in the `public` schema of the postgresql firefly database cluster. However, our schema is `budget`. So, enter the firefly cluster:
+```shell
+psql --host-/home/$USER/fireflyiii/pgsql/tmp --dbname=firefly
+```
+then `ALTER` the values.  
+This set of commands allows you to see what will be changed.
+```shell
+firefly=# SELECT 'ALTER TABLE public.' || table_name || ' SET SCHEMA budget' FROM information_schema.tables WHERE table_schema = 'public';
+firefly=# SELECT 'ALTER SEQUENCE public.' || sequence_name || ' SET SCHEMA budget' FROM information_schema.sequences WHERE sequence_schema = 'public';
+```
+This will make the changes:
+```shell
+firefly=# \i directory/path/to/fireflyiii/pgsql/schema-transfer.sql
+```
+
+And finish up with:
+```shell
+php artisan firefly-iii:upgrade-database
+php artisan firefly-iii:laravel-passport-keys
+```
