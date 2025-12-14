@@ -188,11 +188,7 @@ rm composer-setup.php
 ## Firefly
 - Make the directory for the firefly application which nginx will serve.
 ```shell
-mkdir ~/fireflyiii/www && cd $_
-```
-- Add the firefly app code to `.gitignore`
-```shell
-sed -i '$a \/www/**' ../.gitignore
+mkdir /var/www/fireflyiii && cd $_
 ```
 
 - Download Firefly-iii version 6.4.8 and its checksum file.
@@ -209,7 +205,7 @@ sha256sum -c FireflyIII-v6.4.8.tar.gz.sha256
 ```
 - Extract the tarball
 ```shell
-mkdir ./firefly-iii && tar -xvf FireflyIII-v6.4.8.tar.gz -C ./firefly-iii
+tar -xvf FireflyIII-v6.4.8.tar.gz -C /var/www/firefly-iii
 ```
 
 ### Configuration
