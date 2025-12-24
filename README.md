@@ -220,22 +220,23 @@ https://docs.firefly-iii.org/references/faq/install/#i-want-to-use-postgresql
   - `DB_CONNECTION=pgsql`
   - `DB_HOST=/home/$USER/fireflyiii/pgsql/tmp`, with $USER having to be the concrete value.
   - `DB_USERNAME`, Should be the user unless changed after the `createdb` command.
+  - `DB_PORT=5432`
   - `DB_PASSWORD`
-  - `PGSQL_SCHEMA`=budget
+  - `PGSQL_SCHEMA=budget`
 
 #### Initialize the Database
 Similar to the commands in  
 https://docs.firefly-iii.org/how-to/firefly-iii/installation/self-managed/#initialize-the-database,  
 but with some modifications due to using Postgresql.
 
-Within the firefly-iii application directory:
+Within the firefly-iii application directory, `/var/www/firefly-iii` from above:
 ```shell
 php artisan migrate:refresh --force --seed
 ```
 
 This creates all the necessary tables and sequence object in the `public` schema of the postgresql firefly database cluster. However, our schema is `budget`. So, enter the firefly cluster:
 ```shell
-psql --host-/home/$USER/fireflyiii/pgsql/tmp --dbname=firefly
+psql --host=/home/$USER/fireflyiii/pgsql/tmp --dbname=firefly
 ```
 then `ALTER` the values.  
 This set of commands allows you to see what will be changed.
