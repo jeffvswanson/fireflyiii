@@ -5,3 +5,4 @@
 *.log
 *.tar.gz
 *.tar.gz.sha256
+*.env

@@ -32,7 +32,20 @@ Another way is to navigate to http://localhost.
 The result should be a page with, "**Welcome to nginx!**"
 
 ### Configuration
-
+1. Navigate to the nginx application directory: 
+```shell
+cd /etc/nginx`
+```
+2. Open `nginx.conf` with your preferred text editor and replace `user nginx` with `user www-data`. This is the default user for PHP FastCGI's process manager.
+3. Navigate to the nginx configuration directory:
+```shell 
+cd /etc/nginx/conf.d
+```
+4. Rename the default nginx configuration file to always have a clean backup:
+```shell
+mv default.conf default.conf_bak
+```
+5. 
 
 ## PostgreSQL
 ### Installation
@@ -253,4 +266,10 @@ And finish up with:
 ```shell
 php artisan firefly-iii:upgrade-database
 php artisan firefly-iii:laravel-passport-keys
+```
+
+#### Nginx Server
+
+```shell
+sudo nginx -s reload
 ```
